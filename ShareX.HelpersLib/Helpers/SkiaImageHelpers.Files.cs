@@ -24,6 +24,7 @@
 #endregion License Information (GPL v3)
 
 using Avalonia.Controls;
+using ShareX.AvaloniaUI.Imaging;
 using SkiaSharp;
 using System;
 using System.Drawing;
@@ -49,13 +50,17 @@ public static partial class SkiaImageHelpers
     public static string[] OpenImageFileDialog(bool multiselect, Window form = null, string initialDirectory = null)
     {
         return FileDialogHelpers.OpenFiles(filter:
-            $"{Localization.Strings.ImageHelpers_Image_files} (*.png, *.jpg, *.jpeg, *.jpe, *.jfif, *.gif, *.bmp)|*.png;*.jpg;*.jpeg;*.jpe;*.jfif;*.gif;*.bmp|" +
-            "PNG (*.png)|*.png|JPEG (*.jpg, *.jpeg, *.jpe, *.jfif)|*.jpg;*.jpeg;*.jpe;*.jfif|GIF (*.gif)|*.gif|BMP (*.bmp)|*.bmp",
+            $"{Localization.Strings.ImageHelpers_Image_files} (*.png, *.jpg, *.jpeg, *.jpe, *.jfif, *.gif, *.bmp, *.webp, *.heic, *.heif)|*.png;*.jpg;*.jpeg;*.jpe;*.jfif;*.gif;*.bmp;*.webp;*.heic;*.heif;*.hif|" +
+            "PNG (*.png)|*.png|JPEG (*.jpg, *.jpeg, *.jpe, *.jfif)|*.jpg;*.jpeg;*.jpe;*.jfif|GIF (*.gif)|*.gif|BMP (*.bmp)|*.bmp|" +
+            "WebP (*.webp)|*.webp|HEIC/HEIF (*.heic, *.heif)|*.heic;*.heif;*.hif",
             multiselect: multiselect, initialDirectory: initialDirectory, owner: form);
     }
 
     public static bool SaveImage(SKBitmap img, string filePath)
     {
+        // HEIC/HEIF cannot be encoded; never write PNG data into an iPhone photo file.
+        if (HeifImageDecoder.HasHeifExtension(filePath)) filePath = Path.ChangeExtension(filePath, "png");
+
         FileHelpers.CreateDirectoryFromFilePath(filePath);
         ImageFileFormat imageFormat = GetImageFormat(filePath);
 
@@ -105,6 +110,7 @@ public static partial class SkiaImageHelpers
         int filterIndex = TryGetImageFormat(filePath, out EImageFormat imageFormat) ? GetSaveImageFilterIndex(imageFormat) : 1;
         string selectedPath = FileDialogHelpers.SaveFile(filter: SaveImageFilter,
             fileName: Path.GetFileName(filePath), initialDirectory: initialDirectory, defaultExtension: "png", filterIndex: filterIndex);
+        if (HeifImageDecoder.HasHeifExtension(selectedPath)) selectedPath = Path.ChangeExtension(selectedPath, "png");
         if (!string.IsNullOrEmpty(selectedPath) && SaveImage(img, selectedPath))
         {
             HelpersOptions.LastSaveDirectory = Path.GetDirectoryName(selectedPath);
@@ -193,6 +199,12 @@ public static partial class SkiaImageHelpers
     {
         try
         {
+            if (HeifImageDecoder.IsHeifFile(path))
+            {
+                using SKBitmap heif = HeifImageDecoder.DecodeFile(path);
+                return new Size(heif.Width, heif.Height);
+            }
+
             using FileStream stream = File.OpenRead(path);
             using SKManagedStream managed = new(stream, false);
             using SKCodec codec = SKCodec.Create(managed);

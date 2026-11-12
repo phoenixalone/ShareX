@@ -23,6 +23,7 @@
 
 #endregion License Information (GPL v3)
 
+using ShareX.AvaloniaUI.Imaging;
 using ShareX.AvaloniaUI.Theming;
 using ShareX.HelpersLib;
 using ShareX.HistoryLib;
@@ -267,6 +268,27 @@ namespace ShareX
                     Settings.UpdateChannel = UpdateChannel.PreRelease;
                 }
             }
+
+            if (!Settings.HeifImageExtensionsAdded)
+            {
+                AddHeifImageExtensions(DefaultTaskSettings);
+                Settings.HeifImageExtensionsAdded = true;
+            }
+        }
+
+        // HEIC/HEIF (iPhone photos) became image files; saved settings keep their old extension list, so extend it once.
+        private static void AddHeifImageExtensions(TaskSettings taskSettings)
+        {
+            List<string> extensions = taskSettings?.AdvancedSettings?.ImageExtensions;
+            if (extensions == null) return;
+
+            foreach (string extension in HeifImageDecoder.FileExtensions)
+            {
+                if (!extensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+                {
+                    extensions.Add(extension);
+                }
+            }
         }
 
         public static void HistoryConnect()
@@ -350,6 +372,16 @@ namespace ShareX
                         taskSettings.CaptureSettings.FFmpegOptions.FixSources();
                     }
                 }
+            }
+
+            if (!HotkeysConfig.HeifImageExtensionsAdded)
+            {
+                foreach (TaskSettings taskSettings in HotkeysConfig.Hotkeys.Select(x => x.TaskSettings))
+                {
+                    AddHeifImageExtensions(taskSettings);
+                }
+
+                HotkeysConfig.HeifImageExtensionsAdded = true;
             }
         }
 

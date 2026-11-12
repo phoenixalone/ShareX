@@ -61,7 +61,7 @@ public partial class ImageWatermarkWindow : Window
         {
             Title = Localization.Strings.ImageThumbnailerWindow_Add_images_dialog,
             AllowMultiple = true,
-            FileTypeFilter = [FilePickerFileTypes.ImageAll]
+            FileTypeFilter = [HeifImageDecoder.ImageAll]
         });
         return files.Select(file => file.Path.LocalPath).ToArray();
     }
@@ -72,7 +72,7 @@ public partial class ImageWatermarkWindow : Window
         {
             Title = Localization.Strings.IconConverterViewModel_Select_image_dialog,
             AllowMultiple = false,
-            FileTypeFilter = [FilePickerFileTypes.ImageAll]
+            FileTypeFilter = [HeifImageDecoder.ImageAll]
         });
         return files.FirstOrDefault()?.Path.LocalPath;
     }

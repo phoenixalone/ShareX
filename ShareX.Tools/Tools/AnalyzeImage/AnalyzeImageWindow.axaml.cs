@@ -86,7 +86,7 @@ public partial class AnalyzeImageWindow : Window
         {
             Title = Localization.Strings.AnalyzeImageWindow_Select_image_dialog,
             AllowMultiple = false,
-            FileTypeFilter = [FilePickerFileTypes.ImageAll]
+            FileTypeFilter = [HeifImageDecoder.ImageAll]
         });
 
         return files.FirstOrDefault()?.Path.LocalPath;

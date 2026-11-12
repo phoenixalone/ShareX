@@ -28,6 +28,11 @@
     <ProjectReference Include="..\ShareX.Icons\ShareX.Icons.csproj" />
   </ItemGroup>
 
+  <!-- Optional native libheif (HEIC/HEIF decoder). Build it with Scripts\Build-LibHeif.ps1; without it HEIC files are simply not decoded. -->
+  <ItemGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <None Include="..\Lib\libheif\$(RuntimeIdentifier)\*.dll" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+  </ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Update="Localization\Strings.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

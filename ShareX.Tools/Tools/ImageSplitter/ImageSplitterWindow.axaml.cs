@@ -58,7 +58,7 @@ public partial class ImageSplitterWindow : Window
         {
             Title = Localization.Strings.ImageSplitterWindow_Choose_image_dialog,
             AllowMultiple = false,
-            FileTypeFilter = [FilePickerFileTypes.ImageAll]
+            FileTypeFilter = [HeifImageDecoder.ImageAll]
         });
         return files.FirstOrDefault()?.Path.LocalPath;
     }

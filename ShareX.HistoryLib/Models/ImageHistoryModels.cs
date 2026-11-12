@@ -266,6 +266,9 @@ public sealed class ImageHistoryThumbnailLoader : IDisposable
 
         if (token.IsCancellationRequested || FileHelpers.IsVideoFile(filePath)) return null;
         using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        AvaloniaBitmap? heifThumbnail = HeifImageDecoder.TryLoadPreview(stream, new PixelSize(width, height));
+        if (heifThumbnail != null) return heifThumbnail;
+
         AvaloniaBitmap thumbnail = AvaloniaBitmap.DecodeToWidth(stream, width);
         if (token.IsCancellationRequested)
         {

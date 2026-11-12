@@ -64,7 +64,7 @@ public partial class AnimatedGifMakerWindow : Window
         {
             Title = Localization.Strings.AnimatedGifMakerWindow_Add_images_dialog,
             AllowMultiple = true,
-            FileTypeFilter = [FilePickerFileTypes.ImageAll]
+            FileTypeFilter = [HeifImageDecoder.ImageAll]
         });
         return files.Select(file => file.Path.LocalPath).ToArray();
     }

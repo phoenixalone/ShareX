@@ -60,7 +60,7 @@ public partial class ImageAnnotation : Annotation, IDisposable
             {
                 ImagePath = path;
                 _imageBitmap?.Dispose();
-                _imageBitmap = SKBitmap.Decode(path);
+                _imageBitmap = HeifImageDecoder.DecodeAnyFile(path);
             }
             catch { }
         }

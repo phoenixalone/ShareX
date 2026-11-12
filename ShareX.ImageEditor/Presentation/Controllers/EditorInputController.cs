@@ -1602,13 +1602,13 @@ public class EditorInputController
             {
                 Title = Strings.EditorView_SelectImage,
                 AllowMultiple = false,
-                FileTypeFilter = new[] { FilePickerFileTypes.ImageAll }
+                FileTypeFilter = new[] { HeifImageDecoder.ImageAll }
             });
 
             if (files.Count > 0)
             {
                 using var stream = await files[0].OpenReadAsync();
-                var bitmap = new global::Avalonia.Media.Imaging.Bitmap(stream);
+                var bitmap = HeifImageDecoder.LoadBitmap(stream);
                 var imageControl = new Image { Source = bitmap, Width = bitmap.Size.Width, Height = bitmap.Size.Height, Stretch = Stretch.Fill };
                 var annotation = new ImageAnnotation();
                 annotation.SetImage(BitmapConversionHelpers.ToSKBitmap(bitmap));

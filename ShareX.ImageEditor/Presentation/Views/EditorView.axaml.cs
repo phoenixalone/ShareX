@@ -1809,7 +1809,7 @@ namespace ShareX.ImageEditor.Presentation.Views
                     {
                         var ext = System.IO.Path.GetExtension(file.Name)?.ToLowerInvariant();
 
-                        if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".gif" || ext == ".webp" || ext == ".ico")
+                        if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".gif" || ext == ".webp" || ext == ".ico" || HeifImageDecoder.HasHeifExtension(ext))
                         {
                             try
                             {
@@ -1817,7 +1817,7 @@ namespace ShareX.ImageEditor.Presentation.Views
                                 using var memStream = new System.IO.MemoryStream();
                                 await stream.CopyToAsync(memStream);
                                 memStream.Position = 0;
-                                var skBitmap = SKBitmap.Decode(memStream);
+                                var skBitmap = HeifImageDecoder.DecodeAny(memStream);
                                 if (skBitmap != null)
                                 {
                                     // If there's no base image yet (common in embedded MainWindow editor),
@@ -1928,7 +1928,7 @@ namespace ShareX.ImageEditor.Presentation.Views
             {
                 Title = Strings.EditorView_OpenImage,
                 AllowMultiple = false,
-                FileTypeFilter = [FilePickerFileTypes.ImageAll]
+                FileTypeFilter = [HeifImageDecoder.ImageAll]
             });
 
             if (files.Count > 0)
@@ -1940,7 +1940,7 @@ namespace ShareX.ImageEditor.Presentation.Views
                 await stream.CopyToAsync(memStream);
                 memStream.Position = 0;
 
-                var skBitmap = SKBitmap.Decode(memStream);
+                var skBitmap = HeifImageDecoder.DecodeAny(memStream);
                 if (skBitmap == null) return;
 
                 LoadBitmapIntoEditor(vm, skBitmap, filePath);
@@ -2075,7 +2075,7 @@ namespace ShareX.ImageEditor.Presentation.Views
                     (clipboardBitmap as IDisposable)?.Dispose();
                     ms.Position = 0;
 
-                    var skBitmap = SKBitmap.Decode(ms);
+                    var skBitmap = HeifImageDecoder.DecodeAny(ms);
                     if (skBitmap != null)
                     {
                         vm.CloseModalCommand.Execute(null);
@@ -2099,7 +2099,7 @@ namespace ShareX.ImageEditor.Presentation.Views
                             await stream.CopyToAsync(memStream);
                             memStream.Position = 0;
 
-                            var skBitmap = SKBitmap.Decode(memStream);
+                            var skBitmap = HeifImageDecoder.DecodeAny(memStream);
                             if (skBitmap != null)
                             {
                                 vm.CloseModalCommand.Execute(null);
@@ -2190,7 +2190,7 @@ namespace ShareX.ImageEditor.Presentation.Views
                 await stream.CopyToAsync(memStream);
                 memStream.Position = 0;
 
-                var skBitmap = SKBitmap.Decode(memStream);
+                var skBitmap = HeifImageDecoder.DecodeAny(memStream);
                 if (skBitmap == null)
                 {
                     startScreenDialog?.SetUrlLoading(false);
@@ -2226,7 +2226,7 @@ namespace ShareX.ImageEditor.Presentation.Views
             try
             {
                 using var stream = File.OpenRead(filePath);
-                var skBitmap = SKBitmap.Decode(stream);
+                var skBitmap = HeifImageDecoder.DecodeAny(stream);
                 if (skBitmap == null)
                 {
                     EditorServices.ReportError(nameof(EditorView), $"Failed to decode image file '{filePath}'.");
@@ -2328,6 +2328,9 @@ namespace ShareX.ImageEditor.Presentation.Views
 
             if (!string.IsNullOrEmpty(vm.ImageFilePath))
             {
+                // HEIC/HEIF cannot be written; never overwrite the original photo.
+                if (HeifImageDecoder.HasHeifExtension(vm.ImageFilePath)) return SaveAsAsync();
+
                 SaveSnapshotToFile(vm.ImageFilePath!);
                 vm.IsDirty = false;
                 return Task.FromResult<string?>(vm.ImageFilePath);
@@ -2355,7 +2358,8 @@ namespace ShareX.ImageEditor.Presentation.Views
             {
                 Title = Strings.EditorView_SaveImageAs,
                 SuggestedFileName = !string.IsNullOrEmpty(vm.ImageFilePath)
-                    ? System.IO.Path.GetFileName(vm.ImageFilePath)
+                    ? System.IO.Path.GetFileName(HeifImageDecoder.HasHeifExtension(vm.ImageFilePath)
+                        ? System.IO.Path.ChangeExtension(vm.ImageFilePath, ".png") : vm.ImageFilePath)
                     : "image.png",
                 FileTypeChoices =
                 [
@@ -2381,6 +2385,8 @@ namespace ShareX.ImageEditor.Presentation.Views
         {
             using var bitmap = GetSnapshot();
             if (bitmap == null) return;
+
+            if (HeifImageDecoder.HasHeifExtension(path)) path = System.IO.Path.ChangeExtension(path, ".png");
 
             var ext = System.IO.Path.GetExtension(path)?.ToLowerInvariant();
             var format = ext switch

@@ -415,7 +415,7 @@ namespace ShareX.ImageEditor.Presentation.ViewModels
                 try
                 {
                     using FileStream stream = File.OpenRead(filePath);
-                    using SKBitmap? skBitmap = SKBitmap.Decode(stream);
+                    using SKBitmap? skBitmap = HeifImageDecoder.DecodeAny(stream);
                     if (skBitmap != null)
                     {
                         return BitmapConversionHelpers.ToAvaloniBitmap(skBitmap);

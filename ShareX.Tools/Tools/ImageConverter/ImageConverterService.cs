@@ -45,6 +45,11 @@ public static class ImageConverterService
 
     public static SKBitmap? LoadImage(string filePath)
     {
+        if (HeifImageDecoder.IsHeifFile(filePath))
+        {
+            return HeifImageDecoder.DecodeAnyFile(filePath);
+        }
+
         using SKCodec? codec = SKCodec.Create(filePath);
         if (codec == null)
         {

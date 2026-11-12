@@ -23,6 +23,7 @@
 
 #endregion License Information (GPL v3)
 
+using ShareX.AvaloniaUI.Imaging;
 using ShareX.HelpersLib;
 using ShareX.Localization;
 using ShareX.UploadersLib;
@@ -117,6 +118,16 @@ namespace ShareX
             {
                 task.Info.Job = TaskJob.Job;
                 task.Image = SkiaImageHelpers.LoadImage(task.Info.FilePath);
+            }
+            else if (task.Info.DataType == EDataType.Image && HeifImageDecoder.IsHeifFile(task.Info.FilePath))
+            {
+                // Most image hosts reject HEIC/HEIF (iPhone photos), so upload a JPEG copy instead of the original file.
+                task.Info.Job = TaskJob.FileUpload;
+
+                if (!task.LoadHeifAsJpegStream())
+                {
+                    return null;
+                }
             }
             else
             {
@@ -1099,6 +1110,29 @@ namespace ShareX
             {
                 TaskHelpers.OCRImage(Image, Info.TaskSettings).GetAwaiter().GetResult();
             }
+        }
+
+        private bool LoadHeifAsJpegStream()
+        {
+            try
+            {
+                using (Bitmap bmp = HeifImageDecoder.DecodeFile(Info.FilePath))
+                {
+                    MemoryStream stream = SkiaImageHelpers.SaveJPEG(bmp, Info.TaskSettings.ImageSettings.ImageJPEGQuality,
+                        Info.TaskSettings.ImageSettings.ImageJPEGSubsampling);
+                    stream.Position = 0;
+                    Data = stream;
+                }
+
+                Info.FileName = Path.ChangeExtension(Info.FileName, "jpg");
+            }
+            catch (Exception e)
+            {
+                e.ShowError();
+                return false;
+            }
+
+            return true;
         }
 
         private bool LoadFileStream()

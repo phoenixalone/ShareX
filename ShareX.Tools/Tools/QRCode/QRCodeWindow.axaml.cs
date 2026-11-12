@@ -130,7 +130,7 @@ public partial class QRCodeWindow : Window
         {
             Title = Localization.Strings.QRCodeWindow_Select_image_dialog,
             AllowMultiple = false,
-            FileTypeFilter = [FilePickerFileTypes.ImageAll]
+            FileTypeFilter = [HeifImageDecoder.ImageAll]
         });
 
         return files.Count > 0

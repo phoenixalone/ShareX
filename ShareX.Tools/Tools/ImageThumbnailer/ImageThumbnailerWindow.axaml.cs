@@ -57,7 +57,7 @@ public partial class ImageThumbnailerWindow : Window
         {
             Title = Localization.Strings.ImageThumbnailerWindow_Add_images_dialog,
             AllowMultiple = true,
-            FileTypeFilter = [FilePickerFileTypes.ImageAll]
+            FileTypeFilter = [HeifImageDecoder.ImageAll]
         });
         return files.Select(file => file.Path.LocalPath).ToArray();
     }

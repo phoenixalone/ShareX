@@ -333,3 +333,5 @@ Output/
 APIKeysLocal.cs
 ResXManager.config.xml
 .claude/skills
+# Native libheif binaries built by Scripts/Build-LibHeif.ps1
+/Lib/libheif/

@@ -26,6 +26,7 @@
 #nullable enable
 
 using Avalonia.Media.Imaging;
+using ShareX.AvaloniaUI.Imaging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -166,7 +167,7 @@ public sealed class ImageViewerViewModel : INotifyPropertyChanged, IDisposable
         try
         {
             using MemoryStream stream = new(imageData, writable: false);
-            ReplaceImage(new Bitmap(stream));
+            ReplaceImage(HeifImageDecoder.LoadBitmap(stream));
             _images = [];
             _currentImageIndex = 0;
             CurrentImageFilePath = displayName;
@@ -214,7 +215,7 @@ public sealed class ImageViewerViewModel : INotifyPropertyChanged, IDisposable
         try
         {
             CurrentImageFilePath = _images[_currentImageIndex];
-            ReplaceImage(new Bitmap(CurrentImageFilePath));
+            ReplaceImage(HeifImageDecoder.LoadBitmap(CurrentImageFilePath));
             UpdateStatus();
             PlayAnimation(CurrentImageFilePath);
             return true;

@@ -43,6 +43,7 @@ namespace ShareX
         public string FileUploadDefaultDirectory = "";
         public int NameParserAutoIncrementNumber = 0;
         public List<QuickTaskInfo> QuickTaskPresets = QuickTaskInfo.DefaultPresets;
+        public bool HeifImageExtensionsAdded = false;
 
         // Main window
         public bool FirstTimeMinimizeToTray = true;

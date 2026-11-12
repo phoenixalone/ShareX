@@ -29,6 +29,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using ShareX.AvaloniaUI.Imaging;
 using ShareX.PhotoEditor.UI.Commands;
 
 namespace ShareX.PhotoEditor.UI;
@@ -192,13 +193,14 @@ public sealed class StartScreen : Border
     private static void LoadThumbnail(Border target, string path, int decodeWidth)
     {
         string extension = Path.GetExtension(path).ToLowerInvariant();
-        if (extension is not (".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".webp")) return;
+        if (extension is not (".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".webp" or ".heic" or ".heif" or ".hif")) return;
         _ = Task.Run(() =>
         {
             try
             {
                 using FileStream stream = File.OpenRead(path);
-                return Bitmap.DecodeToWidth(stream, decodeWidth);
+                return HeifImageDecoder.TryLoadPreview(stream, new PixelSize(decodeWidth, int.MaxValue)) ??
+                    Bitmap.DecodeToWidth(stream, decodeWidth);
             }
             catch
             {

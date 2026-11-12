@@ -31,5 +31,6 @@ namespace ShareX
     public class HotkeysConfig : SettingsBase<HotkeysConfig>
     {
         public List<HotkeySettings> Hotkeys = HotkeyManager.GetDefaultHotkeyList();
+        public bool HeifImageExtensionsAdded = false;
     }
 }

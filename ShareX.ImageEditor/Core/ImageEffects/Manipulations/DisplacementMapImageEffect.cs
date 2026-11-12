@@ -97,7 +97,7 @@ public sealed class DisplacementMapImageEffect : ImageEffectBase
             return null;
         }
 
-        SKBitmap? map = SKBitmap.Decode(mapPath);
+        SKBitmap? map = HeifImageDecoder.DecodeAnyFile(mapPath);
         if (map == null || map.Width <= 0 || map.Height <= 0)
         {
             map?.Dispose();

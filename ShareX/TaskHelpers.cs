@@ -24,6 +24,7 @@
 #endregion License Information (GPL v3)
 
 using Avalonia.Threading;
+using ShareX.AvaloniaUI.Imaging;
 using ShareX.AvaloniaUI.Windows;
 using ShareX.HelpersLib;
 using ShareX.HistoryLib;
@@ -1483,6 +1484,11 @@ namespace ShareX
                         string fileName = GetFileName(taskSettings, taskSettings.ImageSettings.ImageFormat.GetFileExtension(), img);
                         newFilePath = Path.Combine(screenshotsFolder, fileName);
                     }
+                    else if (HeifImageDecoder.HasHeifExtension(newFilePath))
+                    {
+                        // ShareX cannot write HEIC/HEIF; save a copy next to the original instead of overwriting it.
+                        newFilePath = Path.ChangeExtension(newFilePath, taskSettings.ImageSettings.ImageFormat.GetFileExtension());
+                    }
 
                     SkiaImageHelpers.SaveImage(img, newFilePath);
                     return newFilePath;
@@ -1496,6 +1502,10 @@ namespace ShareX
                         string screenshotsFolder = GetScreenshotsFolder(taskSettings);
                         string fileName = GetFileName(taskSettings, taskSettings.ImageSettings.ImageFormat.GetFileExtension(), img);
                         newFilePath = Path.Combine(screenshotsFolder, fileName);
+                    }
+                    else if (HeifImageDecoder.HasHeifExtension(newFilePath))
+                    {
+                        newFilePath = Path.ChangeExtension(newFilePath, taskSettings.ImageSettings.ImageFormat.GetFileExtension());
                     }
 
                     newFilePath = SkiaImageHelpers.SaveImageFileDialog(img, newFilePath);

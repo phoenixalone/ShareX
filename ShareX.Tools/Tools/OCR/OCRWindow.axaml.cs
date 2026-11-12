@@ -194,7 +194,7 @@ public partial class OCRWindow : Window
         {
             Title = Localization.Strings.OCRWindow_Select_image_dialog,
             AllowMultiple = false,
-            FileTypeFilter = [FilePickerFileTypes.ImageAll]
+            FileTypeFilter = [HeifImageDecoder.ImageAll]
         });
 
         if (files.Count == 0)
@@ -205,6 +205,16 @@ public partial class OCRWindow : Window
         await using Stream stream = await files[0].OpenReadAsync();
         using MemoryStream memoryStream = new();
         await stream.CopyToAsync(memoryStream);
-        return memoryStream.ToArray();
+        byte[] data = memoryStream.ToArray();
+
+        // OCR engines cannot read HEIC/HEIF, so pass them a PNG copy.
+        if (HeifImageDecoder.IsHeif(data))
+        {
+            using SkiaSharp.SKBitmap bitmap = HeifImageDecoder.Decode(data);
+            using SkiaSharp.SKData png = bitmap.Encode(SkiaSharp.SKEncodedImageFormat.Png, 100);
+            return png.ToArray();
+        }
+
+        return data;
     }
 }

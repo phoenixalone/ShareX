@@ -23,6 +23,7 @@
 
 #endregion License Information (GPL v3)
 
+using ShareX.AvaloniaUI.Imaging;
 using SkiaSharp;
 using System;
 using System.Drawing;
@@ -210,6 +211,9 @@ public static partial class SkiaImageHelpers
             copy.Position = 0;
             return Decode(copy, applyOrientation);
         }
+        // HEIC/HEIF (iPhone photos): libheif applies the orientation stored in the file itself.
+        if (HeifImageDecoder.IsHeif(stream)) return HeifImageDecoder.Decode(stream);
+
         using SKManagedStream managedStream = new(stream, false);
         using SKCodec codec = SKCodec.Create(managedStream);
         if (codec == null) throw new InvalidDataException("The image format is not supported.");

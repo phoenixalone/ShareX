@@ -272,7 +272,7 @@ public sealed partial class AnalyzeImageViewModel : ViewModelBase, IDisposable
         try
         {
             using MemoryStream stream = new(data, writable: false);
-            Bitmap preview = new(stream);
+            Bitmap preview = HeifImageDecoder.LoadBitmap(stream);
             PreviewImage?.Dispose();
             PreviewImage = preview;
             ErrorMessage = string.Empty;

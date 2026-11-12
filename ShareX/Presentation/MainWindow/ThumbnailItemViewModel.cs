@@ -461,6 +461,9 @@ internal sealed class ThumbnailItemViewModel : INotifyPropertyChanged, IDisposab
     // Decode only as large as the thumbnail box needs, without enlarging small images.
     private static Bitmap DecodeToFit(Stream stream, int width, int height)
     {
+        Bitmap? heifThumbnail = HeifImageDecoder.TryLoadPreview(stream, new Avalonia.PixelSize(width, height));
+        if (heifThumbnail != null) return heifThumbnail;
+
         SkiaSharp.SKSizeI size = default;
 
         using (SkiaSharp.SKCodec? codec = SkiaSharp.SKCodec.Create(new SkiaSharp.SKManagedStream(stream, false)))

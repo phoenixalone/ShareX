@@ -66,7 +66,7 @@ namespace ShareX.ImageEditor.Presentation.Views
             {
                 Title = Strings.EditorView_SelectBackgroundImage,
                 AllowMultiple = false,
-                FileTypeFilter = [FilePickerFileTypes.ImageAll]
+                FileTypeFilter = [HeifImageDecoder.ImageAll]
             });
 
             if (files.Count > 0)

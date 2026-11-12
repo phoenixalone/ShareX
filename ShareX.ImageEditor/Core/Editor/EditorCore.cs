@@ -184,7 +184,7 @@ public class EditorCore : IDisposable
     /// </summary>
     public void LoadImage(string filePath)
     {
-        var bitmap = SKBitmap.Decode(filePath);
+        var bitmap = HeifImageDecoder.DecodeAnyFile(filePath);
         if (bitmap != null)
         {
             LoadImage(bitmap);

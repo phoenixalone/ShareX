@@ -142,7 +142,7 @@ public sealed partial class IconConverterViewModel : ViewModelBase, IDisposable
     {
         try
         {
-            SKBitmap? bitmap = SKBitmap.Decode(filePath);
+            SKBitmap? bitmap = HeifImageDecoder.DecodeAnyFile(filePath);
             if (bitmap == null)
             {
                 StatusText = Localization.Strings.IconConverterViewModel_Image_load_failed;

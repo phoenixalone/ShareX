@@ -34,6 +34,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using ShareX.AvaloniaUI.Imaging;
 using ShareX.AvaloniaUI.Theming;
 using ShareX.HelpersLib;
 using ShareX.HistoryLib.Localization;
@@ -455,7 +456,7 @@ public partial class HistoryWindow : Window
             Bitmap bitmap;
             if (localFile)
             {
-                bitmap = await Task.Run(() => new Bitmap(imageSource), token);
+                bitmap = await Task.Run(() => HeifImageDecoder.LoadBitmap(imageSource), token);
             }
             else
             {
@@ -463,7 +464,7 @@ public partial class HistoryWindow : Window
                 bitmap = await Task.Run(() =>
                 {
                     using MemoryStream stream = new(data, writable: false);
-                    return new Bitmap(stream);
+                    return HeifImageDecoder.LoadBitmap(stream);
                 }, token);
             }
 

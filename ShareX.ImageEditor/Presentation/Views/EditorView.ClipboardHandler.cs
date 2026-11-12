@@ -234,7 +234,7 @@ namespace ShareX.ImageEditor.Presentation.Views
                         if (file is IStorageFile storageFile)
                         {
                             var ext = System.IO.Path.GetExtension(storageFile.Name)?.ToLowerInvariant();
-                            if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".gif" || ext == ".webp" || ext == ".ico")
+                            if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".gif" || ext == ".webp" || ext == ".ico" || HeifImageDecoder.HasHeifExtension(ext))
                             {
                                 try
                                 {
@@ -242,7 +242,7 @@ namespace ShareX.ImageEditor.Presentation.Views
                                     using var memStream = new System.IO.MemoryStream();
                                     await stream.CopyToAsync(memStream);
                                     memStream.Position = 0;
-                                    var skBitmap = SKBitmap.Decode(memStream);
+                                    var skBitmap = HeifImageDecoder.DecodeAny(memStream);
                                     if (skBitmap != null)
                                     {
                                         await InsertExternalImageAsync(skBitmap, storageFile.Path.LocalPath);
