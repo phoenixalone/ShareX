@@ -1,7 +1,10 @@
 name: Build ShareX (HEIC)
 
-# Builds a portable ShareX with the libheif decoder bundled. Run it manually from the Actions tab.
+# Builds ShareX with the libheif decoder bundled. Runs on pushes to heic-support, or manually.
 on:
+  push:
+    branches:
+      - heic-support
   workflow_dispatch:
     inputs:
       platform:
@@ -14,14 +17,14 @@ on:
 
 jobs:
   build:
-    name: Build ${{ inputs.platform }}
+    name: Build ${{ inputs.platform || 'x64' }}
     runs-on: windows-latest
 
     permissions:
       contents: read
 
     env:
-      PLATFORM: ${{ inputs.platform }}
+      PLATFORM: ${{ inputs.platform || 'x64' }}
 
     steps:
       - name: Checkout
@@ -34,35 +37,35 @@ jobs:
 
       - name: Set RUNTIME_ID
         run: |
-          $arch = "${{ inputs.platform }}".ToLowerInvariant()
+          $arch = "${{ env.PLATFORM }}".ToLowerInvariant()
           echo "RUNTIME_ID=win-$arch" >> $env:GITHUB_ENV
 
       - name: Cache vcpkg packages
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}\vcpkg-cache
-          key: vcpkg-libheif-${{ inputs.platform }}-${{ hashFiles('Scripts/Build-LibHeif.ps1') }}
+          key: vcpkg-libheif-${{ env.PLATFORM }}-${{ hashFiles('Scripts/Build-LibHeif.ps1') }}
 
       - name: Build libheif
         env:
           VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\vcpkg-cache
         run: |
           New-Item -ItemType Directory -Force -Path $env:VCPKG_DEFAULT_BINARY_CACHE | Out-Null
-          .\Scripts\Build-LibHeif.ps1 -Platform "${{ inputs.platform }}" -VcpkgRoot $env:VCPKG_INSTALLATION_ROOT
+          .\Scripts\Build-LibHeif.ps1 -Platform "${{ env.PLATFORM }}" -VcpkgRoot $env:VCPKG_INSTALLATION_ROOT
 
       - name: Restore NuGet packages
         run: |
           dotnet restore --runtime "${{ env.RUNTIME_ID }}" ShareX.sln
-          if ("${{ inputs.platform }}" -eq "ARM64") {
+          if ("${{ env.PLATFORM }}" -eq "ARM64") {
             # ShareX.Setup always builds as x64, so restore win-x64 packages too
             dotnet restore --runtime "win-x64" "ShareX.Setup\ShareX.Setup.csproj"
           }
 
       - name: Build
-        run: dotnet build --no-restore --configuration Release -p:Platform="${{ inputs.platform }}" --self-contained true /m ShareX.sln
+        run: dotnet build --no-restore --configuration Release -p:Platform="${{ env.PLATFORM }}" --self-contained true /m ShareX.sln
 
       - name: Publish
-        run: dotnet publish --no-build --configuration Release -p:Platform="${{ inputs.platform }}" --self-contained true -o "publish\ShareX" ShareX\ShareX.csproj
+        run: dotnet publish --no-build --configuration Release -p:Platform="${{ env.PLATFORM }}" --self-contained true -o "publish\ShareX" ShareX\ShareX.csproj
 
       - name: Check libheif is bundled
         run: |
